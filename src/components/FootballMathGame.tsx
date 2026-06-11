@@ -47,18 +47,27 @@ const PenaltyShootout = ({ feedback }: { feedback: string | null }) => {
 const generateOptions = (correctAnswer: number, a: number, b: number, type: string) => {
   const options = new Set<number>();
   options.add(correctAnswer);
+  let attempts = 0;
   while (options.size < 4) {
+    attempts++;
     let distractor;
-    const randomCase = Math.floor(Math.random() * 4);
-    if (type === 'standard') {
-      if (randomCase === 0) distractor = (a + 1) * b;
-      else if (randomCase === 1) distractor = a * (b + 1);
-      else if (randomCase === 2) distractor = (a - 1) * b;
-      else distractor = a * b + (Math.random() > 0.5 ? 10 : -10);
+    
+    if (attempts > 20) {
+      // Fallback de seguridad para evitar bucles infinitos en multiplicaciones como 1x1 o 10x10
+      distractor = correctAnswer + Math.floor(Math.random() * 15) - 5;
     } else {
-      distractor = correctAnswer + Math.floor(Math.random() * 5) + 1;
-      if (Math.random() > 0.5) distractor = Math.max(1, correctAnswer - Math.floor(Math.random() * 3) - 1);
+      const randomCase = Math.floor(Math.random() * 4);
+      if (type === 'standard') {
+        if (randomCase === 0) distractor = (a + 1) * b;
+        else if (randomCase === 1) distractor = a * (b + 1);
+        else if (randomCase === 2) distractor = (a - 1) * b;
+        else distractor = a * b + (Math.random() > 0.5 ? 10 : -10);
+      } else {
+        distractor = correctAnswer + Math.floor(Math.random() * 5) + 1;
+        if (Math.random() > 0.5) distractor = Math.max(1, correctAnswer - Math.floor(Math.random() * 3) - 1);
+      }
     }
+
     if (distractor && distractor > 0 && distractor !== correctAnswer) {
       options.add(distractor);
     }
