@@ -50,11 +50,21 @@ async function setupPowersBot() {
   const studentsSnapshot = await getDocs(collection(db, 'students'));
   for (const studentDoc of studentsSnapshot.docs) {
     const studentId = studentDoc.id;
+    const studentData = studentDoc.data();
+    let assignedModules = studentData.assignedModules || [];
+
     for (const mod of powersModules) {
       const studentModRef = doc(db, `students/${studentId}/modules`, mod.id);
       await setDoc(studentModRef, mod, { merge: true });
+      if (!assignedModules.includes(mod.id)) {
+        assignedModules.push(mod.id);
+      }
       console.log(`Módulo ${mod.id} asignado al estudiante ${studentId}.`);
     }
+
+    // Actualizar documento del estudiante
+    const studentRef = doc(db, 'students', studentId);
+    await setDoc(studentRef, { assignedModules }, { merge: true });
   }
 
   console.log('¡Módulos de PotenciasBot instalados correctamente en la base de datos!');
