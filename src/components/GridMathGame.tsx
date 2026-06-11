@@ -142,8 +142,8 @@ export default function GridMathGame({ moduleData: _moduleData }: { moduleData: 
               return (
                 <div 
                   key={`${r}-${c}`}
-                  className={`w-6 h-6 md:w-10 md:h-10 border border-green-800/50 rounded-sm transition-colors duration-100 cursor-pointer flex items-center justify-center
-                    ${selected ? 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)] z-10 scale-105' : 'bg-green-700/50 hover:bg-green-600/50'}
+                  className={`w-6 h-6 md:w-10 md:h-10 border transition-colors duration-100 cursor-pointer flex items-center justify-center
+                    ${selected ? 'bg-yellow-400 border-yellow-600/50 shadow-[inset_0_0_8px_rgba(250,204,21,0.5)] z-10' : 'bg-green-700/50 border-green-800/50 hover:bg-green-600/50'}
                   `}
                   onMouseDown={(e) => { e.preventDefault(); handleMouseDown(r, c); }}
                   onMouseEnter={() => handleMouseEnter(r, c)}
