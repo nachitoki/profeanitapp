@@ -433,12 +433,20 @@ function Dashboard() {
 function ModuleView() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { modules, addXp, markModuleCompleted } = useUser();
+  const { modules, addXp, markModuleCompleted, updateSkills } = useUser();
   const moduleData = id ? modules[id] : null;
 
   const [step, setStep] = useState<'explanation' | 'games'>('explanation');
-  const [gameIndex, setGameIndex] = useState(0);
+  const [queue, setQueue] = useState<number[]>([]);
+  const [firstAttempts, setFirstAttempts] = useState<Record<number, boolean>>({});
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (moduleData?.games) {
+      setQueue(moduleData.games.map((_, i) => i));
+      setFirstAttempts({});
+    }
+  }, [moduleData]);
 
   if (!moduleData) return <div className="container">Módulo no encontrado.</div>;
 
@@ -464,24 +472,56 @@ function ModuleView() {
     return <PowersBotGame moduleData={moduleData} />;
   }
 
+  const currentGameIndex = queue.length > 0 ? queue[0] : 0;
+  const currentGame = moduleData.games?.[currentGameIndex];
+
   const handleOptionSelect = (idx: number) => {
-    if (feedback !== null) return;
-    const currentGame = moduleData.games[gameIndex];
-    if (idx === currentGame.correctIndex) {
+    if (feedback !== null || !currentGame) return;
+    const isCorrect = idx === currentGame.correctIndex;
+    
+    const isFirstAttemptForThisQuestion = firstAttempts[currentGameIndex] === undefined;
+    if (isFirstAttemptForThisQuestion) {
+      setFirstAttempts(prev => ({ ...prev, [currentGameIndex]: isCorrect }));
+    }
+
+    if (isCorrect) {
       setFeedback('correct');
       setTimeout(() => {
         setFeedback(null);
-        if (gameIndex + 1 < moduleData.games.length) {
-          setGameIndex(gameIndex + 1);
-        } else {
-          addXp(moduleData.xpReward);
-          markModuleCompleted(moduleData.id);
-          navigate('/dashboard');
-        }
+        setQueue(prev => {
+          const newQueue = prev.slice(1);
+          if (newQueue.length === 0) {
+            // FINISHED! Compute stats and update
+            const finalAttempts = { ...firstAttempts };
+            if (isFirstAttemptForThisQuestion) finalAttempts[currentGameIndex] = true;
+            
+            const sessionSkillsObj: Record<string, { correct: number, total: number }> = {};
+            moduleData.games.forEach((g, i) => {
+               const tag = g.skillTag || 'General';
+               if (!sessionSkillsObj[tag]) sessionSkillsObj[tag] = { correct: 0, total: 0 };
+               sessionSkillsObj[tag].total += 1;
+               if (finalAttempts[i]) sessionSkillsObj[tag].correct += 1;
+            });
+            
+            updateSkills(sessionSkillsObj);
+            addXp(moduleData.xpReward);
+            markModuleCompleted(moduleData.id);
+            navigate('/dashboard');
+          }
+          return newQueue;
+        });
       }, 1500);
     } else {
       setFeedback('incorrect');
-      setTimeout(() => setFeedback(null), 1500);
+      setTimeout(() => {
+        setFeedback(null);
+        setQueue(prev => {
+           const newQueue = [...prev];
+           const failedIdx = newQueue.shift()!;
+           newQueue.push(failedIdx);
+           return newQueue;
+        });
+      }, 1500);
     }
   };
 
@@ -508,26 +548,26 @@ function ModuleView() {
           </div>
         )}
 
-        {step === 'games' && moduleData.games.length > 0 && (
+        {step === 'games' && moduleData.games.length > 0 && currentGame && (
           <div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem'}}>
               <div style={{display: 'flex', justifyContent: 'space-between', color: 'var(--color-xp)'}}>
-                <span style={{fontWeight: 'bold'}}>Desafío {gameIndex + 1} de {moduleData.games.length}</span>
+                <span style={{fontWeight: 'bold'}}>Misión en Progreso (Restantes: {queue.length})</span>
               </div>
               <div style={{ width: '100%', background: 'var(--bg-elevated)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: `${(gameIndex / moduleData.games.length) * 100}%`, background: 'var(--gradient-xp)', height: '100%', transition: 'width 0.3s ease-out' }}></div>
+                <div style={{ width: `${((moduleData.games.length - queue.length) / moduleData.games.length) * 100}%`, background: 'var(--gradient-xp)', height: '100%', transition: 'width 0.3s ease-out' }}></div>
               </div>
             </div>
             
-            <p style={{fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '2rem'}}>{moduleData.games[gameIndex].question}</p>
+            <p style={{fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '2rem'}}>{currentGame.question}</p>
             
             <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-              {moduleData.games[gameIndex].options.map((opt, idx) => {
+              {currentGame.options.map((opt, idx) => {
                 let bg = 'var(--bg-elevated)';
                 let border = '2px solid transparent';
-                if (feedback === 'correct' && idx === moduleData.games[gameIndex].correctIndex) {
+                if (feedback === 'correct' && idx === currentGame.correctIndex) {
                   bg = 'var(--color-success)';
-                } else if (feedback === 'incorrect' && idx !== moduleData.games[gameIndex].correctIndex) {
+                } else if (feedback === 'incorrect' && idx !== currentGame.correctIndex) {
                   bg = 'var(--color-error)';
                 }
 
