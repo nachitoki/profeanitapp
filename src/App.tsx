@@ -8,6 +8,7 @@ import { PowersLabGame } from './components/PowersLabGame';
 // Limpiado de imports no usados
 import { db } from './firebase';
 import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import confetti from 'canvas-confetti';
 
 // --- TIPOS DE DATOS ---
 type ContentBlock = 
@@ -77,6 +78,7 @@ export type UserState = {
   skills: Record<string, number>;
   assignedResources: string[];
   viewedResources: string[];
+  hasReceivedWelcomeGift?: boolean;
 };
 
 type UserContextType = {
@@ -307,9 +309,29 @@ function Login() {
 }
 
 function Dashboard() {
-  const { user, modules, logout, changePin } = useUser();
+  const { user, modules, logout, changePin, addCoins } = useUser();
   const navigate = useNavigate();
   const [newPin, setNewPin] = useState('');
+  const [showWelcomeGift, setShowWelcomeGift] = useState(false);
+
+  useEffect(() => {
+    if (user && user.hasReceivedWelcomeGift === false && !user.isFirstLogin) {
+      setShowWelcomeGift(true);
+    }
+  }, [user]);
+
+  const claimGift = async () => {
+    if (!user) return;
+    addCoins(50);
+    await updateDoc(doc(db, "students", user.id), { hasReceivedWelcomeGift: true });
+    setShowWelcomeGift(false);
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#FBBF24', '#8B5CF6', '#EC4899']
+    });
+  };
 
   useEffect(() => {
     if (user === null) {
@@ -427,6 +449,25 @@ function Dashboard() {
         <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>📊</span> Mi Radar de Habilidades</h3>
         <SkillsChart skills={user.skills} />
       </section>
+
+      {/* MODAL DE REGALO DE BIENVENIDA */}
+      {showWelcomeGift && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)', padding: '1rem' }}>
+          <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: '2px solid var(--accent-primary)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--gradient-primary)' }}></div>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎉 ¡Sorpresa! 🎉</h2>
+            <p className="text-secondary" style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+              ¡Te hemos regalado <strong>50 Monedas</strong> por tu regreso!
+            </p>
+            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>💰</div>
+            <div style={{ background: 'var(--bg-elevated)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+              <p style={{ color: '#FBBF24', fontWeight: 'bold', margin: 0 }}>🏪 Tienda en construcción...</p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.5rem 0 0 0' }}>Pronto podrás comprar avatares y poderes.</p>
+            </div>
+            <button onClick={claimGift} className="btn btn-primary" style={{ width: '100%', fontSize: '1.2rem', padding: '1rem' }}>¡Genial, gracias!</button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
