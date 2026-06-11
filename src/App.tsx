@@ -602,7 +602,7 @@ function TeacherAuthWrapper({ children }: { children: React.ReactNode }) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'Profe2358') {
+    if (password === 'Profe2368') {
       localStorage.setItem('teacherAuth', 'true');
       setIsAuth(true);
     } else {
