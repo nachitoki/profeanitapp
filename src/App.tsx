@@ -2,6 +2,7 @@ import React, { useState, createContext, useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import FootballMathGame from './components/FootballMathGame';
+import GridMathGame from './components/GridMathGame';
 // Limpiado de imports no usados
 import { db } from './firebase';
 import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -21,7 +22,7 @@ type GameConfig = {
 
 interface LearningModule {
   id: string;
-  type: 'standard' | 'diagnostic' | 'football_math'; 
+  type: 'standard' | 'diagnostic' | 'football_math' | 'grid_math'; 
   title: string;
   theme: string;
   xpReward: number;
@@ -354,6 +355,15 @@ function ModuleView() {
       <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
         <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginBottom: '2rem' }}>← Abandonar Misión</button>
         <FootballMathGame moduleData={moduleData} />
+      </div>
+    );
+  }
+
+  if (moduleData.type === 'grid_math') {
+    return (
+      <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+        <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginBottom: '2rem' }}>← Abandonar Misión</button>
+        <GridMathGame moduleData={moduleData} />
       </div>
     );
   }
