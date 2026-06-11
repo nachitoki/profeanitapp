@@ -2,8 +2,13 @@ import { useState } from 'react';
 import { useUser } from '../App';
 import confetti from 'canvas-confetti';
 
-export default function GridMathGame({ moduleData: _moduleData }: { moduleData: any }) {
-  const { addXp, addCoins } = useUser();
+import { useNavigate } from 'react-router-dom';
+
+export default function GridMathGame({ moduleData }: { moduleData: any }) {
+  const { addXp, addCoins, markModuleCompleted } = useUser();
+  const navigate = useNavigate();
+  const isInfinite = moduleData?.isInfinite === true;
+  const maxQuestions = 5;
 
   const generateRandomQ = () => {
     return {
@@ -84,9 +89,15 @@ export default function GridMathGame({ moduleData: _moduleData }: { moduleData: 
       });
 
       setTimeout(() => {
-        setCurrentQ(generateRandomQ());
-        setQIndex(qIndex + 1);
-        resetTurn();
+        if (!isInfinite && qIndex + 1 >= maxQuestions) {
+          markModuleCompleted(moduleData.id);
+          addXp(moduleData.xpReward || 50); // Bono de completación
+          navigate('/dashboard');
+        } else {
+          setCurrentQ(generateRandomQ());
+          setQIndex(qIndex + 1);
+          resetTurn();
+        }
       }, 3500);
     } else {
       // Si se equivoca en el número, borrar el número y dar pistas
@@ -125,9 +136,18 @@ export default function GridMathGame({ moduleData: _moduleData }: { moduleData: 
 
         <div className="flex flex-col items-end">
           <span className="text-green-300 text-xs font-bold uppercase tracking-wider">Aciertos</span>
-          <span className="text-2xl font-black text-white">{qIndex}</span>
+          <span className="text-2xl font-black text-white">{qIndex}{!isInfinite && ` / ${maxQuestions}`}</span>
         </div>
       </div>
+
+      {!isInfinite && (
+        <div className="w-full bg-green-950 rounded-full h-3 mb-6 border border-green-800 overflow-hidden shadow-inner">
+          <div 
+            className="bg-yellow-400 h-3 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(250,204,21,0.5)]" 
+            style={{ width: `${(qIndex / maxQuestions) * 100}%` }}
+          ></div>
+        </div>
+      )}
 
       {/* Grid 12x12 */}
       <div className="bg-green-950/80 p-3 md:p-4 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] z-10 border-2 border-green-700">

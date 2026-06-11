@@ -28,6 +28,7 @@ interface LearningModule {
   xpReward: number;
   explanation: ContentBlock[];
   games: GameConfig[]; 
+  isInfinite?: boolean;
 }
 
 type ResourceType = 'video' | 'pdf' | 'link';
@@ -314,6 +315,9 @@ function Dashboard() {
   const currentLevelXp = user.xp % XP_PER_LEVEL;
   const progressPercent = (currentLevelXp / XP_PER_LEVEL) * 100;
 
+  const mainMissions = user.assignedModules.filter(id => modules[id] && !modules[id].isInfinite);
+  const infiniteMissions = user.assignedModules.filter(id => modules[id] && modules[id].isInfinite);
+
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
@@ -341,29 +345,54 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* MISIONES */}
-      <section style={{ marginBottom: '4rem' }}>
-        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>📚</span> Misiones Principales</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          {user.assignedModules.map(modId => {
-            const mod = modules[modId];
-            if (!mod) return null;
-            const isCompleted = user.completedModules.includes(mod.id);
-            return (
-              <Link key={mod.id} to={`/module/${mod.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                <motion.div className="card" style={{ cursor: 'pointer', borderTop: `4px solid ${isCompleted ? 'var(--color-success)' : 'var(--accent-primary)'}`, opacity: isCompleted ? 0.8 : 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <h4 style={{ margin: '0 0 0.5rem 0' }}>{mod.title}</h4>
-                    {isCompleted && <span style={{ fontSize: '0.75rem', background: 'var(--color-success)', color: 'black', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>COMPLETADO</span>}
-                  </div>
-                  <p className="text-secondary" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>Temática: {mod.theme}</p>
-                  <span style={{ fontSize: '0.875rem', color: 'var(--color-xp)', fontWeight: 'bold' }}>+{mod.xpReward} XP</span>
-                </motion.div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      {/* MISIONES PRINCIPALES */}
+      {mainMissions.length > 0 && (
+        <section style={{ marginBottom: '4rem' }}>
+          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>📚</span> Misiones Principales</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            {mainMissions.map(modId => {
+              const mod = modules[modId];
+              const isCompleted = user.completedModules.includes(mod.id);
+              return (
+                <Link key={mod.id} to={`/module/${mod.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                  <motion.div className="card" style={{ cursor: 'pointer', borderTop: `4px solid ${isCompleted ? 'var(--color-success)' : 'var(--accent-primary)'}`, opacity: isCompleted ? 0.8 : 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <h4 style={{ margin: '0 0 0.5rem 0' }}>{mod.title}</h4>
+                      {isCompleted && <span style={{ fontSize: '0.75rem', background: 'var(--color-success)', color: 'black', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>COMPLETADO</span>}
+                    </div>
+                    <p className="text-secondary" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>Temática: {mod.theme}</p>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--color-xp)', fontWeight: 'bold' }}>+{mod.xpReward} XP</span>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ENTRENAMIENTO INFINITO */}
+      {infiniteMissions.length > 0 && (
+        <section style={{ marginBottom: '4rem' }}>
+          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>♾️</span> Entrenamiento Libre</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            {infiniteMissions.map(modId => {
+              const mod = modules[modId];
+              return (
+                <Link key={mod.id} to={`/module/${mod.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                  <motion.div className="card" style={{ cursor: 'pointer', borderTop: `4px solid #FBBF24` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <h4 style={{ margin: '0 0 0.5rem 0' }}>{mod.title}</h4>
+                      <span style={{ fontSize: '0.75rem', background: '#FBBF24', color: 'black', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>INFINITO</span>
+                    </div>
+                    <p className="text-secondary" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>Temática: {mod.theme}</p>
+                    <span style={{ fontSize: '0.875rem', color: '#FBBF24', fontWeight: 'bold' }}>Gana Monedas al Jugar</span>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -444,8 +473,13 @@ function ModuleView() {
 
         {step === 'games' && moduleData.games.length > 0 && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', color: 'var(--color-xp)'}}>
-              <span style={{fontWeight: 'bold'}}>Desafío {gameIndex + 1} de {moduleData.games.length}</span>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', color: 'var(--color-xp)'}}>
+                <span style={{fontWeight: 'bold'}}>Desafío {gameIndex + 1} de {moduleData.games.length}</span>
+              </div>
+              <div style={{ width: '100%', background: 'var(--bg-elevated)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: `${(gameIndex / moduleData.games.length) * 100}%`, background: 'var(--gradient-xp)', height: '100%', transition: 'width 0.3s ease-out' }}></div>
+              </div>
             </div>
             
             <p style={{fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '2rem'}}>{moduleData.games[gameIndex].question}</p>
