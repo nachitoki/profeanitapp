@@ -1,15 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDocs, collection } from 'firebase/firestore';
 
-// Usa la configuración real de Firebase
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyB...", // Será inyectado o puedes pasar un env dummy
-  authDomain: "profeanitapp.firebaseapp.com",
   projectId: "profeanitapp",
-  storageBucket: "profeanitapp.appspot.com",
-  messagingSenderId: "374249080277",
-  appId: "1:374249080277:web:cff2f0cbdb0f269a8385a4",
-  measurementId: "G-9DNDHXY4T0"
+  appId: "1:392022580885:web:bc68a356460ba90349059c",
+  storageBucket: "profeanitapp.firebasestorage.app",
+  apiKey: "AIzaSyCJYSnZ2PinvNuv7r7T5MidGJPmXpZMnjI",
+  authDomain: "profeanitapp.firebaseapp.com",
+  messagingSenderId: "392022580885",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -21,6 +19,7 @@ const powersModules = [
     title: "Misión: El Robot de las Potencias",
     description: "Ayuda a PotenciasBot a procesar la energía entendiendo cómo funcionan las potencias. ¡Completa la práctica final!",
     type: "powers_bot",
+    theme: "Matemáticas 🤖",
     status: "unlocked",
     requiredLevel: 1,
     xpReward: 150
@@ -30,6 +29,7 @@ const powersModules = [
     title: "Práctica Libre: Simulador de Potencias",
     description: "Entrena con PotenciasBot sin límites. Resuelve ejercicios de propiedades y fracciones para ganar XP y monedas rápidamente.",
     type: "powers_bot",
+    theme: "Matemáticas 🤖",
     isInfinite: true,
     status: "unlocked",
     requiredLevel: 1
