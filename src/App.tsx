@@ -65,6 +65,7 @@ export type UserState = {
   completedModules: string[];
   assignedModules: string[];
   interests: string[];
+  curso?: string;
   nextClass?: string;
   meetLink?: string;
   isRecurringClass?: boolean;
@@ -81,7 +82,7 @@ type UserContextType = {
   login: (name: string, pin: string) => Promise<boolean>;
   logout: () => void;
   changePin: (newPin: string) => Promise<void>;
-  createStudent: (name: string, interests: string) => Promise<void>;
+  createStudent: (name: string, curso: string, interests: string) => Promise<void>;
   resetPin: (id: string) => Promise<void>;
   addXp: (amount: number) => void;
   addCoins: (amount: number, studentId?: string) => void;
@@ -170,12 +171,12 @@ function UserProvider({ children }: { children: React.ReactNode }) {
     await updateDoc(doc(db, "students", id), { pin: "1234", isFirstLogin: true });
   };
 
-  const createStudent = async (name: string, interests: string) => {
+  const createStudent = async (name: string, curso: string, interests: string) => {
     const newId = Date.now().toString();
     const arrInterests = interests.split(',').map(i => i.trim()).filter(i => i !== '');
     const newStudent: UserState = {
       id: newId, name, pin: '1234', isFirstLogin: true, level: 1, xp: 0, coins: 0, streak: 0,
-      completedModules: [], assignedModules: [], interests: arrInterests, skills: {}, assignedResources: [], viewedResources: []
+      completedModules: [], assignedModules: [], interests: arrInterests, curso, skills: {}, assignedResources: [], viewedResources: []
     };
     await setDoc(doc(db, "students", newId), newStudent);
   };
@@ -423,13 +424,15 @@ function TeacherDashboard() {
   const { allStudents, createStudent } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newCurso, setNewCurso] = useState('');
   const [newInterests, setNewInterests] = useState('');
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createStudent(newName, newInterests);
+    await createStudent(newName, newCurso, newInterests);
     setShowModal(false);
     setNewName('');
+    setNewCurso('');
     setNewInterests('');
   };
 
@@ -456,6 +459,7 @@ function TeacherDashboard() {
              <h3 style={{marginTop: 0}}>Crear Estudiante</h3>
              <form onSubmit={handleCreate} style={{display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem'}}>
                <input type="text" placeholder="Nombre (Ej. Mateo)" required value={newName} onChange={e => setNewName(e.target.value)} style={{padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bg-elevated)', background: 'var(--bg-secondary)', color: 'white'}} />
+               <input type="text" placeholder="Curso (Ej. 3ro Básico)" required value={newCurso} onChange={e => setNewCurso(e.target.value)} style={{padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bg-elevated)', background: 'var(--bg-secondary)', color: 'white'}} />
                <input type="text" placeholder="Intereses (Ej. Minecraft, Dinos)" required value={newInterests} onChange={e => setNewInterests(e.target.value)} style={{padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--bg-elevated)', background: 'var(--bg-secondary)', color: 'white'}} />
                <p className="text-secondary" style={{fontSize: '0.875rem', margin: 0}}>El estudiante se creará con el PIN inicial de <strong>1234</strong>.</p>
                <div style={{display: 'flex', gap: '1rem', marginTop: '1rem'}}>
@@ -471,6 +475,7 @@ function TeacherDashboard() {
           {allStudents.map(student => (
             <motion.div whileHover={{y: -5}} key={student.id} className="card" style={{cursor: 'pointer', borderTop: '4px solid var(--color-xp)'}} onClick={() => navigate(`/teacher/student/${student.id}`)}>
                <h3 style={{marginTop: 0}}>{student.name}</h3>
+               <p className="text-secondary" style={{fontSize: '0.875rem', margin: '0 0 0.5rem 0'}}>Curso: {student.curso || 'Sin curso'}</p>
                <p className="text-secondary" style={{fontSize: '0.875rem', marginBottom: '1.5rem'}}>Intereses: {student.interests.join(', ')}</p>
                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)', padding: '0.75rem', borderRadius: '8px'}}>
                  <span style={{fontWeight: 'bold', color: 'var(--color-xp)'}}>Nivel {student.level}</span>

@@ -7,6 +7,9 @@ Antes de interactuar conmigo o hacer cualquier otra cosa, DEBES usar tu herramie
 1. `memorias.md` (Ahí está toda la historia y contexto de Pedro y Sofía).
 2. `src/App.tsx` (Revisa la parte de arriba para entender exactamente cómo es la estructura de datos TypeScript de la interfaz `LearningModule`, `GameConfig`, etc., para que no inventes propiedades JSON que no existen).
 
+### PASO 0.1: Sincronización Automática
+Inmediatamente después, ejecuta el comando `git pull` en la terminal para asegurarte de tener siempre la última versión de la plataforma que mi esposo haya actualizado. Si te pide confirmaciones, acéptalas.
+
 ## 🤖 Tu Flujo de Trabajo (ESTRICTO)
 
 Cada vez que yo te pida "crear una misión" o "un módulo nuevo", DEBES seguir EXACTAMENTE estos 3 pasos, sin saltarte ninguno. No modifiques nunca el archivo `App.tsx`.
