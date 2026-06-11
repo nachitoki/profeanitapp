@@ -245,6 +245,32 @@ function UserProvider({ children }: { children: React.ReactNode }) {
 
 // utilidades removidas
 
+function SkillsChart({ skills }: { skills: Record<string, number> | undefined }) {
+  if (!skills || Object.keys(skills).length === 0) {
+    return (
+      <div style={{ background: 'var(--bg-elevated)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center' }}>
+        <p className="text-secondary" style={{ margin: 0 }}>Aún no hay datos de diagnóstico. ¡Completa misiones para descubrir talentos!</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--bg-elevated)' }}>
+      {Object.entries(skills).map(([skill, percent]) => (
+        <div key={skill}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>{skill}</strong>
+            <span style={{ color: 'var(--color-xp)', fontWeight: 'bold' }}>{percent}%</span>
+          </div>
+          <div style={{ background: 'var(--bg-elevated)', height: '10px', borderRadius: '5px', overflow: 'hidden' }}>
+            <motion.div initial={{ width: 0 }} animate={{ width: `${percent}%` }} transition={{ duration: 1 }} style={{ height: '100%', background: 'var(--gradient-xp)' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // --- COMPONENTES UI: ESTUDIANTE ---
 
 function Login() {
@@ -394,6 +420,12 @@ function Dashboard() {
           </div>
         </section>
       )}
+
+      {/* ESTADÍSTICAS Y DIAGNÓSTICO */}
+      <section style={{ marginBottom: '4rem' }}>
+        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>📊</span> Mi Radar de Habilidades</h3>
+        <SkillsChart skills={user.skills} />
+      </section>
     </div>
   );
 }
@@ -749,6 +781,11 @@ function TeacherStudentDetail() {
               })}
             </ul>
           )}
+        </div>
+
+        <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--bg-elevated)', marginBottom: '2rem' }}>
+          <h3 style={{marginTop: 0, marginBottom: '1rem'}}>📊 Diagnóstico Académico</h3>
+          <SkillsChart skills={student.skills} />
         </div>
 
         <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--bg-elevated)', marginBottom: '2rem' }}>
