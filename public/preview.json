@@ -1,0 +1,14 @@
+{
+  "id": "draft_0",
+  "type": "standard",
+  "title": "Borrador Vacío",
+  "theme": "General",
+  "xpReward": 50,
+  "explanation": [
+    {
+      "type": "text",
+      "content": "Aún no has generado ninguna misión. Pídele a Antigravity que cree un borrador para verlo aquí."
+    }
+  ],
+  "games": []
+}
