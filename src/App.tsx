@@ -5,6 +5,8 @@ import FootballMathGame from './components/FootballMathGame';
 import GridMathGame from './components/GridMathGame';
 import PowersBotGame from './components/PowersBotGame';
 import { PowersLabGame } from './components/PowersLabGame';
+import { WorldCupDashboard } from './components/WorldCupDashboard';
+
 // Limpiado de imports no usados
 import { db } from './firebase';
 import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -79,6 +81,8 @@ export type UserState = {
   assignedResources: string[];
   viewedResources: string[];
   hasReceivedWelcomeGift?: boolean;
+  theme?: string;
+  stickers?: number[];
 };
 
 type UserContextType = {
@@ -107,7 +111,7 @@ export function useUser() {
   return ctx;
 }
 
-const XP_PER_LEVEL = 100;
+export const XP_PER_LEVEL = 100;
 
 function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserState | null>(() => {
@@ -248,7 +252,7 @@ function UserProvider({ children }: { children: React.ReactNode }) {
 
 // utilidades removidas
 
-function SkillsChart({ skills }: { skills: Record<string, number> | undefined }) {
+export function SkillsChart({ skills }: { skills: Record<string, number> | undefined }) {
   if (!skills || Object.keys(skills).length === 0) {
     return (
       <div style={{ background: 'var(--bg-elevated)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center' }}>
@@ -898,13 +902,22 @@ function TeacherStudentDetail() {
   )
 }
 
+function DashboardWrapper() {
+  const { user } = useUser();
+  if (!user) return <Dashboard />; // El Dashboard maneja la redirección
+  if (user.theme === 'worldcup') {
+    return <WorldCupDashboard />;
+  }
+  return <Dashboard />;
+}
+
 function App() {
   return (
     <UserProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<DashboardWrapper />} />
           <Route path="/module/:id" element={<ModuleView />} />
           <Route path="/preview" element={<PreviewModuleView />} />
           <Route path="/teacher" element={<TeacherAuthWrapper><TeacherDashboard /></TeacherAuthWrapper>} />
