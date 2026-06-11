@@ -281,7 +281,21 @@ function Dashboard() {
   const navigate = useNavigate();
   const [newPin, setNewPin] = useState('');
 
-  if (!user || !user.name) return <div className="container" style={{padding: '2rem', textAlign: 'center'}}>Cargando base de datos secreta... 🕵️‍♂️</div>;
+  useEffect(() => {
+    if (user === null) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  if (!user || !user.name) {
+    return (
+      <div className="container" style={{padding: '2rem', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+        <h2 className="text-gradient mb-4">Cargando base de datos secreta... 🕵️‍♂️</h2>
+        <p className="text-secondary">Conectando con la nave nodriza...</p>
+        <button onClick={() => navigate('/')} className="btn btn-secondary" style={{marginTop: '2rem'}}>Volver al Inicio Manualmente</button>
+      </div>
+    );
+  }
 
   if (user.isFirstLogin) {
     return (
