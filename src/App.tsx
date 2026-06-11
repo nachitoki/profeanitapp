@@ -455,9 +455,9 @@ function Dashboard() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)', padding: '1rem' }}>
           <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: '2px solid var(--accent-primary)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--gradient-primary)' }}></div>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎉 ¡Sorpresa! 🎉</h2>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>👩‍🏫 ¡Sorpresa!</h2>
             <p className="text-secondary" style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
-              ¡Te hemos regalado <strong>50 Monedas</strong> por tu regreso!
+              ¡Qué bueno verte de vuelta! Soy la <strong>Profe Anita</strong> y te he dejado <strong>50 Monedas</strong> de regalo para que empieces con todo. ¡A darle a esas misiones!
             </p>
             <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>💰</div>
             <div style={{ background: 'var(--bg-elevated)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
