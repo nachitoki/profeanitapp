@@ -348,6 +348,10 @@ function ModuleView() {
   const { modules, addXp, markModuleCompleted } = useUser();
   const moduleData = id ? modules[id] : null;
 
+  const [step, setStep] = useState<'explanation' | 'games'>('explanation');
+  const [gameIndex, setGameIndex] = useState(0);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
   if (!moduleData) return <div className="container">Módulo no encontrado.</div>;
 
   if (moduleData.type === 'football_math') {
@@ -368,13 +372,95 @@ function ModuleView() {
     );
   }
 
+  const handleOptionSelect = (idx: number) => {
+    if (feedback !== null) return;
+    const currentGame = moduleData.games[gameIndex];
+    if (idx === currentGame.correctIndex) {
+      setFeedback('correct');
+      setTimeout(() => {
+        setFeedback(null);
+        if (gameIndex + 1 < moduleData.games.length) {
+          setGameIndex(gameIndex + 1);
+        } else {
+          addXp(moduleData.xpReward);
+          markModuleCompleted(moduleData.id);
+          navigate('/dashboard');
+        }
+      }, 1500);
+    } else {
+      setFeedback('incorrect');
+      setTimeout(() => setFeedback(null), 1500);
+    }
+  };
+
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem', maxWidth: '800px' }}>
       <button onClick={() => navigate('/dashboard')} className="btn btn-secondary" style={{ marginBottom: '2rem' }}>← Abandonar Misión</button>
-      <div className="card" style={{textAlign: 'center'}}>
-        <h2>{moduleData.title}</h2>
-        <p className="text-secondary">Simulación de la Misión (Se completará instantáneamente por razones de prueba)</p>
-        <button onClick={() => { addXp(moduleData.xpReward); markModuleCompleted(moduleData.id); navigate('/dashboard'); }} className="btn btn-primary" style={{marginTop: '2rem', padding: '1rem 2rem'}}>Completar Misión Mágicamente</button>
+      <div className="card">
+        <h2 style={{margin: '0 0 1rem 0'}}>{moduleData.title}</h2>
+        <p className="text-secondary" style={{margin: '0 0 2rem 0'}}>Temática: {moduleData.theme} | Recompensa: {moduleData.xpReward} XP</p>
+        
+        {step === 'explanation' && (
+          <div>
+            <h3 style={{borderBottom: '1px solid var(--bg-elevated)', paddingBottom: '0.5rem', marginBottom: '1rem'}}>Teoría y Explicación</h3>
+            {moduleData.explanation.map((b, i) => (
+              <div key={i} style={{marginBottom: '1rem', padding: '1rem', background: b.type === 'highlight' ? 'var(--bg-elevated)' : 'transparent', borderRadius: '8px'}}>
+                {b.type === 'highlight' && <h4 className="text-gradient" style={{margin: '0 0 0.5rem 0'}}>{b.title}</h4>}
+                <p style={{margin: 0, fontSize: '1.1rem', lineHeight: '1.6'}}>{b.content}</p>
+              </div>
+            ))}
+            
+            <div style={{textAlign: 'center', marginTop: '2rem'}}>
+              <button onClick={() => setStep('games')} className="btn btn-primary" style={{padding: '1rem 2rem', fontSize: '1.2rem'}}>¡A los Desafíos! 🚀</button>
+            </div>
+          </div>
+        )}
+
+        {step === 'games' && moduleData.games.length > 0 && (
+          <div>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', color: 'var(--color-xp)'}}>
+              <span style={{fontWeight: 'bold'}}>Desafío {gameIndex + 1} de {moduleData.games.length}</span>
+            </div>
+            
+            <p style={{fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '2rem'}}>{moduleData.games[gameIndex].question}</p>
+            
+            <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+              {moduleData.games[gameIndex].options.map((opt, idx) => {
+                let bg = 'var(--bg-elevated)';
+                let border = '2px solid transparent';
+                if (feedback === 'correct' && idx === moduleData.games[gameIndex].correctIndex) {
+                  bg = 'var(--color-success)';
+                } else if (feedback === 'incorrect' && idx !== moduleData.games[gameIndex].correctIndex) {
+                  bg = 'var(--color-error)';
+                }
+
+                return (
+                  <button 
+                    key={idx} 
+                    onClick={() => handleOptionSelect(idx)}
+                    style={{
+                      padding: '1.25rem', 
+                      background: bg, 
+                      border, 
+                      borderRadius: '12px', 
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      textAlign: 'left',
+                      cursor: feedback ? 'default' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+
+            {feedback === 'correct' && <p style={{color: 'var(--color-success)', fontWeight: 'bold', textAlign: 'center', marginTop: '2rem', fontSize: '1.2rem', animation: 'pulse 1s infinite'}}>¡Respuesta Correcta! 🎉</p>}
+            {feedback === 'incorrect' && <p style={{color: 'var(--color-error)', fontWeight: 'bold', textAlign: 'center', marginTop: '2rem', fontSize: '1.2rem'}}>¡Casi! Intenta de nuevo 😅</p>}
+          </div>
+        )}
       </div>
     </div>
   );
