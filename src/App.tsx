@@ -200,6 +200,7 @@ function UserProvider({ children }: { children: React.ReactNode }) {
 
   const markModuleCompleted = async (id: string) => {
     if (!user) return;
+    if (user.completedModules.includes(id)) return;
     await updateDoc(doc(db, "students", user.id), { completedModules: [...user.completedModules, id] });
   };
 
@@ -327,9 +328,12 @@ function Dashboard() {
             if (!mod) return null;
             const isCompleted = user.completedModules.includes(mod.id);
             return (
-              <Link key={mod.id} to={`/module/${mod.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', pointerEvents: isCompleted ? 'none' : 'auto' }}>
-                <motion.div className="card" style={{ cursor: isCompleted ? 'default' : 'pointer', borderTop: `4px solid ${isCompleted ? 'var(--color-success)' : 'var(--accent-primary)'}`, opacity: isCompleted ? 0.6 : 1 }}>
-                  <h4 style={{ margin: '0 0 0.5rem 0' }}>{mod.title}</h4>
+              <Link key={mod.id} to={`/module/${mod.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                <motion.div className="card" style={{ cursor: 'pointer', borderTop: `4px solid ${isCompleted ? 'var(--color-success)' : 'var(--accent-primary)'}`, opacity: isCompleted ? 0.8 : 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0' }}>{mod.title}</h4>
+                    {isCompleted && <span style={{ fontSize: '0.75rem', background: 'var(--color-success)', color: 'black', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>COMPLETADO</span>}
+                  </div>
                   <p className="text-secondary" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>Temática: {mod.theme}</p>
                   <span style={{ fontSize: '0.875rem', color: 'var(--color-xp)', fontWeight: 'bold' }}>+{mod.xpReward} XP</span>
                 </motion.div>
