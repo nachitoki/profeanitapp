@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import FootballMathGame from './components/FootballMathGame';
 import GridMathGame from './components/GridMathGame';
 import PowersBotGame from './components/PowersBotGame';
+import { PowersLabGame } from './components/PowersLabGame';
 // Limpiado de imports no usados
 import { db } from './firebase';
 import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -23,7 +24,7 @@ type GameConfig = {
 
 interface LearningModule {
   id: string;
-  type: 'standard' | 'diagnostic' | 'football_math' | 'grid_math' | 'powers_bot'; 
+  type: 'standard' | 'diagnostic' | 'football_math' | 'grid_math' | 'powers_bot' | 'powers_lab'; 
   title: string;
   theme: string;
   xpReward: number;
@@ -470,6 +471,10 @@ function ModuleView() {
 
   if (moduleData.type === 'powers_bot') {
     return <PowersBotGame moduleData={moduleData} />;
+  }
+
+  if (moduleData.type === 'powers_lab') {
+    return <PowersLabGame />;
   }
 
   const currentGameIndex = queue.length > 0 ? queue[0] : 0;
