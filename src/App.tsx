@@ -590,6 +590,42 @@ function PreviewModuleView() {
   )
 }
 
+function TeacherAuthWrapper({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const [isAuth, setIsAuth] = useState(localStorage.getItem('teacherAuth') === 'true');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  if (isAuth) {
+    return <>{children}</>;
+  }
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'Profe2358') {
+      localStorage.setItem('teacherAuth', 'true');
+      setIsAuth(true);
+    } else {
+      setError('Clave incorrecta. Acceso denegado.');
+    }
+  };
+
+  return (
+    <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+      <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
+        <h2 style={{ marginBottom: '1rem' }}>Acceso Profesores 👩‍🏫</h2>
+        <p className="text-secondary" style={{ marginBottom: '2rem' }}>Ingresa la clave de administrador</p>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <input type="password" placeholder="Clave secreta" value={password} onChange={e => setPassword(e.target.value)} required style={{ padding: '1rem', borderRadius: '8px', border: '1px solid var(--bg-elevated)', background: 'var(--bg-secondary)', color: 'white', textAlign: 'center', letterSpacing: '0.2em' }} />
+          {error && <p style={{color: 'var(--color-error)', margin: 0, fontWeight: 'bold'}}>{error}</p>}
+          <button type="submit" className="btn btn-primary">Verificar Identidad</button>
+          <button type="button" onClick={() => navigate('/')} className="btn btn-secondary" style={{border: 'none'}}>← Volver al Inicio</button>
+        </form>
+      </motion.div>
+    </div>
+  );
+}
+
 function TeacherDashboard() {
   const navigate = useNavigate();
   const { allStudents, createStudent } = useUser();
@@ -723,8 +759,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/module/:id" element={<ModuleView />} />
           <Route path="/preview" element={<PreviewModuleView />} />
-          <Route path="/teacher" element={<TeacherDashboard />} />
-          <Route path="/teacher/student/:id" element={<TeacherStudentDetail />} />
+          <Route path="/teacher" element={<TeacherAuthWrapper><TeacherDashboard /></TeacherAuthWrapper>} />
+          <Route path="/teacher/student/:id" element={<TeacherAuthWrapper><TeacherStudentDetail /></TeacherAuthWrapper>} />
         </Routes>
       </Router>
     </UserProvider>
