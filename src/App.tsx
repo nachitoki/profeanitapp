@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useParams } 
 import { motion } from 'framer-motion';
 import FootballMathGame from './components/FootballMathGame';
 import GridMathGame from './components/GridMathGame';
+import PowersBotGame from './components/PowersBotGame';
 // Limpiado de imports no usados
 import { db } from './firebase';
 import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -22,7 +23,7 @@ type GameConfig = {
 
 interface LearningModule {
   id: string;
-  type: 'standard' | 'diagnostic' | 'football_math' | 'grid_math'; 
+  type: 'standard' | 'diagnostic' | 'football_math' | 'grid_math' | 'powers_bot'; 
   title: string;
   theme: string;
   xpReward: number;
@@ -425,6 +426,10 @@ function ModuleView() {
         <GridMathGame moduleData={moduleData} />
       </div>
     );
+  }
+
+  if (moduleData.type === 'powers_bot') {
+    return <PowersBotGame moduleData={moduleData} />;
   }
 
   const handleOptionSelect = (idx: number) => {
