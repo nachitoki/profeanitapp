@@ -105,7 +105,10 @@ export function useUser() {
 const XP_PER_LEVEL = 100;
 
 function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserState | null>(null);
+  const [user, setUser] = useState<UserState | null>(() => {
+    const savedId = localStorage.getItem('tutorapp_user_id');
+    return savedId ? ({ id: savedId } as UserState) : null;
+  });
   const [allStudents, setAllStudents] = useState<UserState[]>([]);
   const [modules, setModules] = useState<Record<string, LearningModule>>({});
   const [resources, setResources] = useState<Record<string, SharedResource>>({});
@@ -157,12 +160,16 @@ function UserProvider({ children }: { children: React.ReactNode }) {
     const found = allStudents.find(s => s.name.toLowerCase().trim() === name.toLowerCase().trim() && s.pin === pin);
     if (found) {
       setUser(found);
+      localStorage.setItem('tutorapp_user_id', found.id);
       return true;
     }
     return false;
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('tutorapp_user_id');
+  };
 
   const changePin = async (newPin: string) => {
     if (!user) return;
@@ -274,7 +281,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [newPin, setNewPin] = useState('');
 
-  if (!user) return <div className="container" style={{padding: '2rem'}}>Cargando o no autenticado... <Link to="/">Volver al Login</Link></div>;
+  if (!user || !user.name) return <div className="container" style={{padding: '2rem', textAlign: 'center'}}>Cargando base de datos secreta... 🕵️‍♂️</div>;
 
   if (user.isFirstLogin) {
     return (
