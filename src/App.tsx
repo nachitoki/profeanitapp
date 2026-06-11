@@ -133,7 +133,8 @@ function UserProvider({ children }: { children: React.ReactNode }) {
       setAllStudents(studentsData);
       setUser(prevUser => {
         if (!prevUser) return null;
-        return studentsData.find(s => s.id === prevUser.id) || null;
+        const updated = studentsData.find(s => s.id === prevUser.id);
+        return updated || prevUser; // NUNCA desloguear automáticamente por un snapshot vacío
       });
     });
 
