@@ -698,7 +698,7 @@ function TeacherDashboard() {
 function TeacherStudentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { allStudents, resetPin, deleteStudent } = useUser();
+  const { allStudents, modules, resetPin, deleteStudent } = useUser();
   const student = allStudents.find(s => s.id === id);
 
   if (!student) return <div className="container" style={{padding: '2rem'}}>Estudiante no encontrado...</div>;
@@ -730,12 +730,37 @@ function TeacherStudentDetail() {
         </div>
 
         <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--bg-elevated)', marginBottom: '2rem' }}>
+          <h3 style={{marginTop: 0, marginBottom: '1rem'}}>Módulos y Avances</h3>
+          {student.assignedModules.length === 0 ? (
+            <p className="text-secondary" style={{margin: 0}}>No tiene misiones asignadas.</p>
+          ) : (
+            <ul style={{listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+              {student.assignedModules.map(modId => {
+                const mod = modules[modId];
+                const isCompleted = student.completedModules.includes(modId);
+                return (
+                  <li key={modId} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-elevated)', borderRadius: '8px'}}>
+                    <span>{mod ? mod.title : modId} {mod?.isInfinite ? '♾️' : ''}</span>
+                    <span style={{color: isCompleted ? 'var(--color-success)' : 'var(--color-warning)', fontWeight: 'bold', fontSize: '0.875rem'}}>
+                      {isCompleted ? 'Completado ✅' : 'Pendiente ⏳'}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--bg-elevated)', marginBottom: '2rem' }}>
           <h3 style={{marginTop: 0, marginBottom: '1rem'}}>Seguridad del Alumno</h3>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem'}}>
              <div>
-               <p style={{margin: '0 0 0.5rem 0', fontWeight: 'bold'}}>Estado del PIN</p>
+               <p style={{margin: '0 0 0.5rem 0', fontWeight: 'bold'}}>Clave de Acceso (PIN)</p>
                <p className="text-secondary" style={{margin: 0, fontSize: '0.875rem'}}>
-                 {student.isFirstLogin ? 'Usando PIN genérico (1234)' : 'Ha configurado un PIN Secreto Personal'}
+                 {student.isFirstLogin ? 'Usando PIN genérico' : 'El alumno configuró un PIN personal:'}
+               </p>
+               <p style={{margin: '0.5rem 0 0 0', fontSize: '1.5rem', color: 'var(--color-xp)', fontWeight: 'bold', letterSpacing: '0.2em'}}>
+                 {student.pin}
                </p>
              </div>
              <button onClick={handleResetPin} className="btn btn-secondary" style={{borderColor: 'var(--color-warning)', color: 'var(--color-warning)'}}>🔄 Resetear PIN a 1234</button>
