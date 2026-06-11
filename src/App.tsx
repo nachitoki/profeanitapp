@@ -265,7 +265,7 @@ function Login() {
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
       <motion.div className="card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-        <h1 className="text-gradient">TutorApp</h1>
+        <h1 className="text-gradient">Profe Anitapp</h1>
         <p className="text-secondary" style={{ marginBottom: '2rem' }}>Ingresa para continuar tu aventura.</p>
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <input type="text" placeholder="Tu Nombre (Ej. Pedro)" value={name} onChange={e => setName(e.target.value)} required style={{ padding: '1rem', borderRadius: '8px', border: '1px solid var(--bg-elevated)', background: 'var(--bg-secondary)', color: 'white', fontSize: '1rem', outline: 'none', textAlign: 'center' }} />
