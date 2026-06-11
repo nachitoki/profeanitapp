@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useUser, XP_PER_LEVEL, SkillsChart } from '../App';
 import { db } from '../firebase';
 import { updateDoc, doc } from 'firebase/firestore';
-import { StickerAlbum, STICKER_DB } from './StickerAlbum';
+import { StickerAlbum } from './StickerAlbum';
+import { STICKER_DB } from '../data/stickers';
 
 export function WorldCupDashboard() {
   const { user, modules, logout } = useUser();
@@ -25,16 +26,26 @@ export function WorldCupDashboard() {
   const buyPack = async (): Promise<number[]> => {
     if (user.coins < 50) return [];
     
-    // Generar 3 láminas aleatorias (pesos: 80% star, 15% shield, 5% special)
+    // Generar 3 láminas aleatorias usando el sistema Gacha
+    // Probabilidades: 75% base, 20% star, 4% shield, 1% special
     const pulled = [];
     for(let i=0; i<3; i++) {
         const rand = Math.random();
-        let type = 'star';
-        if (rand > 0.8) type = 'shield';
-        if (rand > 0.95) type = 'special';
+        let type = 'base';
         
-        const possible = STICKER_DB.filter(s => s.type === type);
-        const selected = possible[Math.floor(Math.random() * possible.length)];
+        if (rand < 0.01) {
+            type = 'special'; // 1%
+        } else if (rand < 0.05) {
+            type = 'shield';  // 4% (0.01 a 0.05)
+        } else if (rand < 0.25) {
+            type = 'star';    // 20% (0.05 a 0.25)
+        } // 75% restante es base
+        
+        const possible = STICKER_DB.filter((s: any) => s.type === type);
+        // Fallback por si acaso la categoría está vacía
+        const finalPool = possible.length > 0 ? possible : STICKER_DB;
+        
+        const selected = finalPool[Math.floor(Math.random() * finalPool.length)];
         pulled.push(selected.id);
     }
     
@@ -89,7 +100,7 @@ export function WorldCupDashboard() {
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <button onClick={() => setShowAlbum(true)} className="btn" style={{ backgroundColor: '#D97706', color: 'white', border: '2px solid #FBBF24', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-               <span>📖</span> Ver Álbum
+               <span>📖</span> Álbum y Tienda
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.5)', padding: '0.5rem 1rem', borderRadius: '999px', border: '1px solid #FBBF24' }}>
               <span>💰</span><strong style={{ color: '#FBBF24' }}>{user.coins}</strong>
@@ -179,30 +190,64 @@ export function WorldCupDashboard() {
                 </div>
 
                 <div style={{ background: '#111827', borderRadius: '16px', padding: '1.5rem', border: '1px solid #374151' }}>
-                    <h3 style={{ fontFamily: 'Anton, sans-serif', color: '#FCA5A5', margin: '0 0 1rem 0' }}>TABLA DE POSICIONES</h3>
-                    <table style={{ width: '100%', color: 'white', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
+                    <h3 style={{ fontFamily: 'Anton, sans-serif', color: '#FCA5A5', margin: '0 0 1rem 0' }}>PRÓXIMOS PARTIDOS</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                        <div style={{ background: '#1E293B', padding: '0.8rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginBottom: '4px' }}>HOY - 15:00 (Grupo A)</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold' }}>
+                                <span>🇲🇽 México</span> <span>vs</span> <span>🇵🇱 Polonia</span>
+                            </div>
+                        </div>
+                        <div style={{ background: '#1E293B', padding: '0.8rem', borderRadius: '8px', borderLeft: '4px solid #FBBF24' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginBottom: '4px' }}>HOY - 18:00 (Grupo B)</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold' }}>
+                                <span>🇦🇷 Argentina</span> <span>vs</span> <span>🇨🇦 Canadá</span>
+                            </div>
+                        </div>
+                        <div style={{ background: '#1E293B', padding: '0.8rem', borderRadius: '8px', borderLeft: '4px solid #3B82F6' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginBottom: '4px' }}>MAÑANA - 12:00 (Grupo C)</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontWeight: 'bold' }}>
+                                <span>🇧🇷 Brasil</span> <span>vs</span> <span>🇷🇸 Serbia</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ background: '#111827', borderRadius: '16px', padding: '1.5rem', border: '1px solid #374151' }}>
+                    <h3 style={{ fontFamily: 'Anton, sans-serif', color: '#FBBF24', margin: '0 0 1rem 0' }}>POSICIONES - GRUPO A</h3>
+                    <table style={{ width: '100%', color: 'white', fontSize: '0.9rem', borderCollapse: 'collapse', textAlign: 'center' }}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #374151', color: '#94A3B8', textAlign: 'left' }}>
-                                <th style={{ paddingBottom: '0.5rem' }}>#</th>
-                                <th style={{ paddingBottom: '0.5rem' }}>Jugador</th>
-                                <th style={{ paddingBottom: '0.5rem' }}>Nivel</th>
+                            <tr style={{ borderBottom: '1px solid #374151', color: '#94A3B8' }}>
+                                <th style={{ paddingBottom: '0.5rem', textAlign: 'left' }}>País</th>
+                                <th style={{ paddingBottom: '0.5rem' }}>Pts</th>
+                                <th style={{ paddingBottom: '0.5rem' }}>PJ</th>
+                                <th style={{ paddingBottom: '0.5rem' }}>DIF</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td style={{ padding: '0.5rem 0', color: '#FBBF24', fontWeight: 'bold' }}>1</td>
-                                <td style={{ padding: '0.5rem 0' }}>{user.name}</td>
-                                <td style={{ padding: '0.5rem 0' }}>Nv. {user.level}</td>
+                                <td style={{ padding: '0.5rem 0', textAlign: 'left', fontWeight: 'bold' }}>🇲🇽 MEX</td>
+                                <td style={{ padding: '0.5rem 0', color: '#FBBF24' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
                             </tr>
                             <tr>
-                                <td style={{ padding: '0.5rem 0', color: '#94A3B8' }}>2</td>
-                                <td style={{ padding: '0.5rem 0', color: '#94A3B8' }}>Pedro</td>
-                                <td style={{ padding: '0.5rem 0', color: '#94A3B8' }}>Nv. {Math.max(1, user.level - 1)}</td>
+                                <td style={{ padding: '0.5rem 0', textAlign: 'left', fontWeight: 'bold' }}>🇵🇱 POL</td>
+                                <td style={{ padding: '0.5rem 0', color: '#FBBF24' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
                             </tr>
                             <tr>
-                                <td style={{ padding: '0.5rem 0', color: '#94A3B8' }}>3</td>
-                                <td style={{ padding: '0.5rem 0', color: '#94A3B8' }}>Sofía</td>
-                                <td style={{ padding: '0.5rem 0', color: '#94A3B8' }}>Nv. {Math.max(1, user.level - 2)}</td>
+                                <td style={{ padding: '0.5rem 0', textAlign: 'left', fontWeight: 'bold' }}>🇺🇸 USA</td>
+                                <td style={{ padding: '0.5rem 0', color: '#FBBF24' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: '0.5rem 0', textAlign: 'left', fontWeight: 'bold' }}>🇨🇷 CRC</td>
+                                <td style={{ padding: '0.5rem 0', color: '#FBBF24' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
+                                <td style={{ padding: '0.5rem 0' }}>0</td>
                             </tr>
                         </tbody>
                     </table>

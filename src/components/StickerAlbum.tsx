@@ -1,24 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Mocked sticker data for the MVP
-export const STICKER_DB = [
-  { id: 1, name: 'L. MESSI', country: 'ARG', type: 'star', url: 'https://via.placeholder.com/150/00A4E4/FFFFFF?text=MESSI' },
-  { id: 2, name: 'K. MBAPPÉ', country: 'FRA', type: 'star', url: 'https://via.placeholder.com/150/0055A4/FFFFFF?text=MBAPPE' },
-  { id: 3, name: 'VINI JR', country: 'BRA', type: 'star', url: 'https://via.placeholder.com/150/009C3B/FFFFFF?text=VINI+JR' },
-  { id: 4, name: 'E. HAALAND', country: 'NOR', type: 'star', url: 'https://via.placeholder.com/150/BA0C2F/FFFFFF?text=HAALAND' },
-  { id: 5, name: 'J. BELLINGHAM', country: 'ENG', type: 'star', url: 'https://via.placeholder.com/150/FFFFFF/CF142B?text=BELLINGHAM' },
-  { id: 6, name: 'K. DE BRUYNE', country: 'BEL', type: 'star', url: 'https://via.placeholder.com/150/EF3340/FFFFFF?text=DE+BRUYNE' },
-  { id: 7, name: 'H. KANE', country: 'ENG', type: 'star', url: 'https://via.placeholder.com/150/FFFFFF/CF142B?text=KANE' },
-  { id: 8, name: 'A. DAVIES', country: 'CAN', type: 'star', url: 'https://via.placeholder.com/150/FF0000/FFFFFF?text=DAVIES' },
-  { id: 9, name: 'C. PULISIC', country: 'USA', type: 'star', url: 'https://via.placeholder.com/150/002868/FFFFFF?text=PULISIC' },
-  { id: 10, name: 'G. OCHOA', country: 'MEX', type: 'star', url: 'https://via.placeholder.com/150/006847/FFFFFF?text=OCHOA' },
-  { id: 11, name: 'ESCUDO ARG', country: 'ARG', type: 'shield', url: 'https://via.placeholder.com/150/00A4E4/FFFFFF?text=ESCUDO' },
-  { id: 12, name: 'ESCUDO FRA', country: 'FRA', type: 'shield', url: 'https://via.placeholder.com/150/0055A4/FFFFFF?text=ESCUDO' },
-  { id: 13, name: 'ESCUDO BRA', country: 'BRA', type: 'shield', url: 'https://via.placeholder.com/150/009C3B/FFFFFF?text=ESCUDO' },
-  { id: 14, name: 'COPA DEL MUNDO', country: 'FIFA', type: 'special', url: 'https://via.placeholder.com/150/FFD700/000000?text=COPA' },
-  { id: 15, name: 'PELOTA OFICIAL', country: 'FIFA', type: 'special', url: 'https://via.placeholder.com/150/FFFFFF/000000?text=PELOTA' }
-];
+import { STICKER_DB } from '../data/stickers';
 
 export function StickerAlbum({ user, onBuyPack, onSellDuplicate, onClose }: { user: any, onBuyPack: () => Promise<number[]>, onSellDuplicate: (id: number) => Promise<void>, onClose: () => void }) {
   const [opening, setOpening] = useState(false);
@@ -51,14 +34,14 @@ export function StickerAlbum({ user, onBuyPack, onSellDuplicate, onClose }: { us
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1E293B', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #334155' }}>
           <div>
             <span style={{ fontSize: '1.2rem', color: '#94A3B8' }}>Progreso: </span>
-            <strong style={{ fontSize: '1.5rem', color: 'white' }}>{ownedCount} / 15</strong>
+            <strong style={{ fontSize: '1.5rem', color: 'white' }}>{ownedCount} / 50</strong>
           </div>
           <div>
             <span style={{ fontSize: '1.2rem', color: '#94A3B8' }}>Mis Monedas: </span>
             <strong style={{ fontSize: '1.5rem', color: '#FBBF24' }}>💰 {user.coins}</strong>
           </div>
-          <button onClick={handleBuy} disabled={user.coins < 50 || opening} className="btn btn-primary" style={{ backgroundColor: '#10B981', border: 'none' }}>
-            Comprar Sobre (50 💰)
+          <button onClick={handleBuy} disabled={user.coins < 50 || opening} className="btn btn-primary" style={{ backgroundColor: user.coins < 50 ? '#64748B' : '#059669', border: user.coins < 50 ? 'none' : '2px solid #34D399', cursor: user.coins < 50 ? 'not-allowed' : 'pointer' }}>
+            Comprar Sobre (50 Monedas)
           </button>
         </div>
 
@@ -83,7 +66,7 @@ export function StickerAlbum({ user, onBuyPack, onSellDuplicate, onClose }: { us
                 const sData = STICKER_DB.find(s => s.id === id);
                 return (
                   <div key={i} style={{ width: '100px', height: '140px', backgroundColor: '#7FE5E4', borderRadius: '8px', border: '2px solid white', overflow: 'hidden', position: 'relative' }}>
-                    <img src={sData?.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={sData?.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={sData?.name} />
                     <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', backgroundColor: '#007A7A', color: 'white', fontSize: '0.6rem', padding: '2px 0', fontWeight: 'bold' }}>{sData?.name}</div>
                   </div>
                 );
