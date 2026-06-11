@@ -1,33 +1,27 @@
 import { useState } from 'react';
 import { useUser } from '../App';
-import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 
-const QUESTIONS = [
-  { a: 5, b: 4 },
-  { a: 3, b: 6 },
-  { a: 7, b: 2 },
-  { a: 12, b: 3 },
-  { a: 8, b: 4 },
-];
+export default function GridMathGame({ moduleData: _moduleData }: { moduleData: any }) {
+  const { addXp, addCoins } = useUser();
 
-export default function GridMathGame({ moduleData }: { moduleData: any }) {
-  const { addXp, addCoins, markModuleCompleted } = useUser();
-  const navigate = useNavigate();
+  const generateRandomQ = () => {
+    return {
+      a: Math.floor(Math.random() * 11) + 2, // 2 a 12
+      b: Math.floor(Math.random() * 11) + 2  // 2 a 12
+    };
+  };
 
-  const [gameState, setGameState] = useState<'playing' | 'gameover'>('playing');
+  const [currentQ, setCurrentQ] = useState(generateRandomQ());
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
 
   const [dragStart, setDragStart] = useState<{ r: number; c: number } | null>(null);
   const [dragEnd, setDragEnd] = useState<{ r: number; c: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-
   const [hasSelectedArea, setHasSelectedArea] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showAnimation, setShowAnimation] = useState(false);
-
-  const currentQ = QUESTIONS[qIndex];
 
   // Coordenadas calculadas
   const minR = dragStart && dragEnd ? Math.min(dragStart.r, dragEnd.r) : -1;
@@ -78,6 +72,8 @@ export default function GridMathGame({ moduleData }: { moduleData: any }) {
       // Éxito
       setShowAnimation(true);
       setScore((s) => s + 50);
+      addXp(50);
+      addCoins(10);
       
       // Confetti
       confetti({
@@ -88,12 +84,9 @@ export default function GridMathGame({ moduleData }: { moduleData: any }) {
       });
 
       setTimeout(() => {
-        if (qIndex + 1 < QUESTIONS.length) {
-          setQIndex(qIndex + 1);
-          resetTurn();
-        } else {
-          setGameState('gameover');
-        }
+        setCurrentQ(generateRandomQ());
+        setQIndex(qIndex + 1);
+        resetTurn();
       }, 3500);
     } else {
       // Si se equivoca en el número, borrar el número y dar pistas
@@ -108,27 +101,6 @@ export default function GridMathGame({ moduleData }: { moduleData: any }) {
     setInputValue('');
     setShowAnimation(false);
   };
-
-  const finishAndSave = () => {
-    addXp(score);
-    addCoins(Math.floor(score / 5));
-    if (moduleData) {
-      markModuleCompleted(moduleData.id);
-    }
-    navigate('/dashboard');
-  };
-
-  if (gameState === 'gameover') {
-    return (
-      <div className="w-full max-w-4xl mx-auto bg-green-900 min-h-[80vh] rounded-2xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden border-8 border-green-700 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
-         <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 mb-4 drop-shadow-lg">¡Entrenamiento Completado!</h2>
-         <p className="text-white text-xl font-bold mb-8">Puntaje Total: {score}</p>
-         <button onClick={finishAndSave} className="bg-yellow-400 hover:bg-yellow-300 text-green-900 font-black text-xl py-4 px-8 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.6)] transition-transform hover:scale-110">
-           Terminar y Cobrar
-         </button>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-green-800 min-h-[80vh] rounded-2xl p-4 md:p-8 flex flex-col items-center relative overflow-hidden border-4 border-white/20 shadow-2xl select-none" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
@@ -152,8 +124,8 @@ export default function GridMathGame({ moduleData }: { moduleData: any }) {
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-green-300 text-xs font-bold uppercase tracking-wider">Desafío</span>
-          <span className="text-2xl font-black text-white">{qIndex + 1} / {QUESTIONS.length}</span>
+          <span className="text-green-300 text-xs font-bold uppercase tracking-wider">Aciertos</span>
+          <span className="text-2xl font-black text-white">{qIndex}</span>
         </div>
       </div>
 
